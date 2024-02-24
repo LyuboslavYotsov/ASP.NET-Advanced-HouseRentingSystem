@@ -30,6 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     options.SignIn.RequireConfirmedAccount = false;
                     options.Password.RequireDigit = false;
                     options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireLowercase = false;
                     options.Password.RequireUppercase = false;
                 })
                 .AddEntityFrameworkStores<HouseRentingDbContext>();
