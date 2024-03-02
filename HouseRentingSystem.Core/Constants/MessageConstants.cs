@@ -9,5 +9,7 @@
         public const string PhoneExists = "Phone number already exists. Enter another one.";
 
         public const string HasRents = "You should have no rents to become and agent";
+
+        public const string InvalidCategory = "";
     }
 }

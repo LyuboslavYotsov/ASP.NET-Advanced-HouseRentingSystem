@@ -4,8 +4,8 @@
     {
         public const int CategoryNameMaxLength = 50;
 
-        public const int HouseTitleMaxLenght = 50;
-        public const int HouseTitleMinLenght = 10;
+        public const int HouseTitleMaxLength = 50;
+        public const int HouseTitleMinLength = 10;
 
         public const int HouseAddressMaxLength = 150;
         public const int HouseAddressMinLength = 30;
