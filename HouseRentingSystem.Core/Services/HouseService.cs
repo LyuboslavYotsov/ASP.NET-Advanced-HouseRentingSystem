@@ -5,7 +5,6 @@ using HouseRentingSystem.Infrastructure.Data.Common;
 using HouseRentingSystem.Infrastructure.Data.Enums;
 using HouseRentingSystem.Infrastructure.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace HouseRentingSystem.Core.Services
 {
@@ -170,6 +169,52 @@ namespace HouseRentingSystem.Core.Services
                     Title = h.Title
                 })
                 .FirstAsync();
+        }
+
+        public async Task EditAsync(int houseId, HouseFormModel model)
+        {
+            var house = await _repository.GetByIdAsync<House>(houseId);
+
+            if (house != null)
+            {
+                house.Address = model.Address;
+                house.CategoryId = model.CategoryId;
+                house.Description = model.Description;
+                house.ImageUrl = model.ImageUrl;
+                house.PricePerMonth = model.PricePerMonth;
+                house.Title = model.Title;
+
+                await _repository.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> HasAgentWithIdAsync(int houseId, string userId)
+        {
+            return await _repository.AllReadonly<House>()
+                .AnyAsync(h => h.Id == houseId && h.Agent.UserId == userId);
+        }
+
+        public async Task<HouseFormModel?> GetHouseFormModelByIdAsync(int id)
+        {
+            var house =  await _repository.AllReadonly<House>()
+                .Where(h => h.Id == id)
+                .Select(h => new HouseFormModel()
+                {
+                    Address = h.Address,
+                    CategoryId = h.CategoryId,
+                    Description = h.Description,
+                    ImageUrl = h.ImageUrl,
+                    PricePerMonth = h.PricePerMonth,
+                    Title = h.Title
+                })
+                .FirstOrDefaultAsync();
+
+            if (house != null)
+            {
+                house.Categories = await AllCategoriesAsync();
+            }
+
+            return house;
         }
     }
 }

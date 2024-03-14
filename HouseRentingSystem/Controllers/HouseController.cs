@@ -93,7 +93,7 @@ namespace HouseRentingSystem.Controllers
         {
             if (!await _houseService.CategoryExistsAsync(model.CategoryId))
             {
-                ModelState.AddModelError(nameof(model.CategoryId), "");
+                ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
             }
 
             if (!ModelState.IsValid)
@@ -113,7 +113,17 @@ namespace HouseRentingSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var model = new HouseFormModel();
+            if (!await _houseService.ExistsAsync(id))
+            {
+                return BadRequest();
+            }
+
+            if (!await _houseService.HasAgentWithIdAsync(id, User.Id()))
+            {
+                return Unauthorized();
+            }
+
+            var model = await _houseService.GetHouseFormModelByIdAsync(id);
 
             return View(model);
         }
@@ -121,7 +131,31 @@ namespace HouseRentingSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(HouseFormModel model, int id)
         {
-            return RedirectToAction(nameof(Details), new { id = 1 });
+            if (!await _houseService.ExistsAsync(id))
+            {
+                return BadRequest();
+            }
+
+            if (!await _houseService.HasAgentWithIdAsync(id, User.Id()))
+            {
+                return Unauthorized();
+            }
+
+            if (!await _houseService.CategoryExistsAsync(model.CategoryId))
+            {
+                ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Categories = await _houseService.AllCategoriesAsync();
+
+                return View(model);
+            }
+
+            await _houseService.EditAsync(id, model);
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpGet]
