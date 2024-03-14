@@ -196,7 +196,7 @@ namespace HouseRentingSystem.Core.Services
 
         public async Task<HouseFormModel?> GetHouseFormModelByIdAsync(int id)
         {
-            var house =  await _repository.AllReadonly<House>()
+            var house = await _repository.AllReadonly<House>()
                 .Where(h => h.Id == id)
                 .Select(h => new HouseFormModel()
                 {
@@ -215,6 +215,64 @@ namespace HouseRentingSystem.Core.Services
             }
 
             return house;
+        }
+
+        public async Task Delete(int houseId)
+        {
+            var house = await _repository.GetByIdAsync<House>(houseId);
+
+            if (house != null)
+            {
+                _repository.Delete<House>(house);
+
+                await _repository.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> IsRented(int id)
+        {
+            var house = await _repository.GetByIdAsync<House>(id);
+
+            return house.RenterId != null;
+        }
+
+        public async Task<bool> IsRentedByUserWithId(int houseId, string userId)
+        {
+            var house = await _repository.GetByIdAsync<House>(houseId);
+
+            if (house == null)
+            {
+                return false;
+            }
+
+            if (house.RenterId != userId)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task Rent(int houseId, string userId)
+        {
+            var house = await _repository.GetByIdAsync<House>(houseId);
+
+            if (house != null)
+            {
+                house.RenterId = userId;
+                await _repository.SaveChangesAsync();
+            }
+        }
+
+        public async Task Leave(int houseId)
+        {
+            var house = await _repository.GetByIdAsync<House>(houseId);
+
+            if (house != null)
+            {
+                house.RenterId = null;
+                await _repository.SaveChangesAsync();
+            }
         }
     }
 }

@@ -11,5 +11,7 @@
         Task<int> SaveChangesAsync();
 
         Task<T?> GetByIdAsync<T>(int id) where T : class;
+
+        void Delete<T>(T entity) where T : class;
     }
 }
