@@ -39,7 +39,7 @@ namespace HouseRentingSystem.Core.Contracts
 
         Task Delete(int houseId);
 
-        Task<bool> IsRented(int id);
+        Task<bool> IsRentedAync(int id);
 
         Task<bool> IsRentedByUserWithId(int houseId, string userId);
 

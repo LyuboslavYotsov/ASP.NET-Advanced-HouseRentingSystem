@@ -120,7 +120,8 @@ namespace HouseRentingSystem.Core.Services
                 {
                     Id = h.Id,
                     Title = h.Title,
-                    ImageUrl = h.ImageUrl
+                    ImageUrl = h.ImageUrl,
+                    Address = h.Address
                 })
                 .ToListAsync();
 
@@ -219,21 +220,22 @@ namespace HouseRentingSystem.Core.Services
 
         public async Task Delete(int houseId)
         {
+            await _repository.DeleteAsync<House>(houseId);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsRentedAync(int houseId)
+        {
             var house = await _repository.GetByIdAsync<House>(houseId);
+
+            bool? result = null;
 
             if (house != null)
             {
-                _repository.Delete<House>(house);
-
-                await _repository.SaveChangesAsync();
+                result  = house.RenterId != null;
             }
-        }
 
-        public async Task<bool> IsRented(int id)
-        {
-            var house = await _repository.GetByIdAsync<House>(id);
-
-            return house.RenterId != null;
+            return result ?? false;
         }
 
         public async Task<bool> IsRentedByUserWithId(int houseId, string userId)

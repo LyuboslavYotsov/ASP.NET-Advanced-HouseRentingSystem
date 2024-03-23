@@ -1,5 +1,6 @@
 ﻿using HouseRentingSystem.Attributes;
 using HouseRentingSystem.Core.Contracts;
+using HouseRentingSystem.Core.Extensions;
 using HouseRentingSystem.Core.Models.House;
 using HouseRentingSystem.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -63,7 +64,7 @@ namespace HouseRentingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string information)
         {
             if (await _houseService.ExistsAsync(id) == false)
             {
@@ -72,12 +73,17 @@ namespace HouseRentingSystem.Controllers
 
             var model = await _houseService.HouseDatailsByIdAsync(id);
 
+            if (information != model.GetInformation())
+            {
+                return BadRequest();
+            }
+
             return View(model);
         }
 
         [HttpGet]
         [MustBeAgent]
-        public async  Task<IActionResult> Add()
+        public async Task<IActionResult> Add()
         {
             var model = new HouseFormModel()
             {
@@ -107,7 +113,7 @@ namespace HouseRentingSystem.Controllers
 
             int newHouseId = await _houseService.CreateAsync(model, agentId ?? 0);
 
-            return RedirectToAction(nameof(Details), new {id = newHouseId});
+            return RedirectToAction(nameof(Details), new { id = newHouseId, information = model.GetInformation() });
         }
 
         [HttpGet]
@@ -155,7 +161,7 @@ namespace HouseRentingSystem.Controllers
 
             await _houseService.EditAsync(id, model);
 
-            return RedirectToAction(nameof(Details), new { id });
+            return RedirectToAction(nameof(Details), new { id, information = model.GetInformation() });
         }
 
         [HttpGet]
@@ -215,7 +221,7 @@ namespace HouseRentingSystem.Controllers
                 return Unauthorized();
             }
 
-            if (await _houseService.IsRented(id))
+            if (await _houseService.IsRentedAync(id))
             {
                 return BadRequest();
             }
@@ -228,7 +234,7 @@ namespace HouseRentingSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Leave(int id)
         {
-            if (!await _houseService.ExistsAsync(id) || !await _houseService.IsRented(id))
+            if (!await _houseService.ExistsAsync(id) || !await _houseService.IsRentedAync(id))
             {
                 return BadRequest();
             }
